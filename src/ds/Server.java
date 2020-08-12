@@ -8,33 +8,50 @@ import java.nio.charset.StandardCharsets;
 public class Server {
 
     public static void main(String[] args) throws IOException {
-        ServerSocket ss = new ServerSocket(6666); // 监听指定端口
-        System.out.println("server is running...");
-        for (;;) {
-            Socket sock = ss.accept();
-            System.out.println("connected from " + sock.getRemoteSocketAddress());
-            Thread t = new Handler(sock);
-            t.start();
-        }
+        Thread t1 = new Handler(3000);
+        t1.start();
+        Thread t2 = new Handler(4000);
+        t2.start();
     }
 }
 
 class Handler extends Thread {
-    Socket sock;
+    int portNum;
+    Socket sock = null;
     private int sum1 = 0; // 到时候做三个sum，一个thread做一个sum
-    public Handler(Socket sock) {
-        this.sock = sock;
+    public Handler(int portNum) {
+        this.portNum = portNum;
     }
 
     @Override
     public void run() {
-        try (InputStream input = this.sock.getInputStream()) {
-            try (OutputStream output = this.sock.getOutputStream()) {
+        ServerSocket ss = null; // 监听指定端口
+        try {
+            ss = new ServerSocket(portNum);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("server is running...");
+        for (;;) {
+            try {
+                sock = ss.accept();
+                System.out.println("connected from " + sock.getRemoteSocketAddress());
+                prepare((sock));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void prepare(Socket sock){
+        try (InputStream input = sock.getInputStream()) {
+            try (OutputStream output = sock.getOutputStream()) {
                 handle(input, output);
             }
         } catch (Exception e) {
             try {
-                this.sock.close();
+                sock.close();
             } catch (IOException ioe) {
             }
             System.out.println("client disconnected.");
@@ -50,6 +67,11 @@ class Handler extends Thread {
             String s = reader.readLine();
             if (s.equals("bye")) {
                 writer.write("bye\n");
+                writer.flush();
+                break;
+            }
+            if (s.equals("Are you alive")) {
+                writer.write("I am alive\n");
                 writer.flush();
                 break;
             }
