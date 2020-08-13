@@ -8,10 +8,10 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class Lfd {
+public class Lfd2 {
     public static void main(String[] args) throws IOException, InterruptedException {
         while(true){
-            if (isAlive(4000)){
+            if (isAlive(6001)){
                 System.out.println("server is alive");
             }else{
                 System.out.println("Waiting for server");
@@ -20,7 +20,7 @@ public class Lfd {
         }
     }
 
-    private static boolean isAlive(int portNum) throws IOException, InterruptedException {
+    public static boolean isAlive(int portNum) throws IOException, InterruptedException {
         Boolean isAlive = false;
         SocketAddress socketAddress = new InetSocketAddress("localhost", portNum);
         Socket sock = new Socket();
